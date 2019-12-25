@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+    </p><br /><p>
+    <p class='text-muted'>
+      Code Driller is where you can study software language flashcards produced and curated by a community of developers.
+      Subjects are shown below along with the quanity of flashcards in the database.
+    </p><br /><p> 
+      There is no cost to use this website. You are welcome to improve this by submitting your own uncopyrighted content.
+    </p><br /><p>
+      What language do you want to study?
+    </p><br /><p>
+    <div>
+      <!-- <a class="btn btn-secondary btn-sm mt-1 mb-5 ml-3" href="{{ url_for('java_cards') }}">Java ({{java_tot}})</a>
+      <a class="btn btn-secondary btn-sm mt-1 mb-5 ml-3" href="{{ url_for('javascript_cards') }}">JavaScript ({{javascript_tot}})</a>
+      <a class="btn btn-secondary btn-sm mt-1 mb-5 ml-3" href="{{ url_for('python_cards') }}">Python ({{python_tot}})</a> -->
+
+      
+
+      <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('java_cards') }}">Java <span class="badge badge-light">{{java_tot}}</span></button> </a> 
+      <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('javascript_cards') }}">JavaScript <span class="badge badge-light">{{javascript_tot}}</span></button> </a> 
+      <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('python_cards') }}">Python <span class="badge badge-light">{{python_tot}}</span></button> </a> 
+
+    </div>
+{% endblock content %}

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% for post in cards.items %}
+      {% if post.id == card_num %}
+
+        <a class="ml-3 text-muted" <h1>Question</h1></a>
+          <article class="media content-section">
+          <div class="media-body">
+            <b>
+            <p class="article-content">{{ post.question }}</p>
+            </b>
+          </div>
+        </article>
+
+        <a class="ml-3 text-muted" <h1>Answer</h1></a>
+        <article class="media content-section">
+          <div class="media-body">
+            <b>
+            <p class="article-content">{{ post.answer }}</p>
+            </b>
+          </div>
+        </article>
+        {% if current_user.is_authenticated %}
+          <p <br /> </p>
+          {% if show_voting_btns %}
+            <a class="btn btn-secondary btn-sm mt-2 mb-2 ml-3" href="{{ url_for('upvote') }}">Up Vote</a>
+            <a class="btn btn-secondary btn-sm mt-2 mb-2 ml-3" href="{{ url_for('downvote') }}">Down Vote</a>
+          {% endif %}
+          <a class="btn btn-secondary btn-sm mt-2 mb-2 ml-3" href="{{ url_for('archive') }}">Archive</a>
+          <a class="btn btn-secondary btn-sm mt-2 mb-2 ml-3" href="{{ url_for('flag') }}">Flag</a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+{% endblock content %}
+
+
+
+
+
+
