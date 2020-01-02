@@ -18,7 +18,7 @@ cards_tot = int()
 table = PythonCards
 table_name = 'python_cards'
 language = 'Python'
-lang_tab = {'Java': 'java_cards', 'JavaScript': 'javascript_cards', 'Python': 'python_cards'}
+# lang_tab = {'Java': 'java_cards', 'JavaScript': 'javascript_cards', 'Python': 'python_cards'}
 
 
 def get_paths(path):
@@ -36,7 +36,6 @@ def get_cards_tot(table_name):
     if total is None:
         total = '0'
     else:
-    # TEST REWRITING THE ABOVE TO MATCH FLAG CODE BELOW.
     # Find the number of flagged cards to subtract from the total.
         flags = db.session.execute(f'SELECT flagged FROM {table_name}')
         flags = [e for e, in flags]
@@ -44,13 +43,13 @@ def get_cards_tot(table_name):
     return total
 
 
-@app.route("/")
-@app.route("/home")
-def home():
-    java_tot = get_cards_tot('java_cards')
-    javascript_tot = get_cards_tot('javascript_cards')
-    python_tot = get_cards_tot('python_cards')
-    return render_template('home.html', title='Home', sidebar=False, java_tot=java_tot, javascript_tot=javascript_tot, python_tot=python_tot)
+# @app.route("/")
+# @app.route("/home")
+# def home():
+#     java_tot = get_cards_tot('java_cards')
+#     javascript_tot = get_cards_tot('javascript_cards')
+#     python_tot = get_cards_tot('python_cards')
+#     return render_template('home.html', title='Home', sidebar=False, java_tot=java_tot, javascript_tot=javascript_tot, python_tot=python_tot)
 
 
 def find_card_ids():
@@ -72,9 +71,22 @@ def archive_card():
     db.session.commit()
 
 
-@app.route("/study_question")
-def study_question():
+def specify_subject(card_subject):
+    """ This will be useful when adding other card decks (SQL tables). """
+    global table, table_name, language, recently_viewed, card_ids
+    table, table_name, language = card_subject
+    recently_viewed = []
+    card_ids = []
+    reset_users_cards()
+
+
+@app.route("/")
+@app.route("/home")
+def home():    
     global card_num, cards_tot, cards, recently_viewed, card_ids, num_archived, card_num_formatted
+
+    # Make this call from a route if more languages are added.
+    specify_subject(card_subject = (PythonCards, 'python_cards',  'Python'))
 
     # If this page is displayed without a language subject, route them to the home page.
     if language == '':
@@ -89,8 +101,7 @@ def study_question():
         cards_tot = 0
 
     if not current_user.is_authenticated:
-        flash(f'Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
-
+        flash(f'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
 
     if cards_tot == 0 and not current_user.is_authenticated:
         flash('There are no cards in this deck. Please register, login, and add some!', 'warning')
@@ -134,7 +145,6 @@ def study_question():
         if cards_tot > 0:
             elgible_ids = set(find_card_ids())
 
-    # NECESSARY????????????????????
     if 0 in elgible_ids:
         elgible_ids.remove(0)
 
@@ -173,7 +183,7 @@ def study_question():
     user = User.query.get(card_submitter_id) 
     card_submitter = user.username
     
-    return render_template('study_question.html', card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
+    return render_template('home.html', card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
 
 
 @app.route("/study_answer")
@@ -184,19 +194,22 @@ def study_answer():
     
     if current_user.is_authenticated:
         # Determine whether the user has voted on the card.
+        # upvoted = ''
+        # downvoted = ''
         user = User.query.get(current_user.id)
-        if len(user.upvoted) == 1:
-            user.upvoted = user.upvoted + ',' + user.upvoted
-        if len(user.downvoted) == 1:
-            user.downvoted = user.downvoted + ',' + user.downvoted
-        if user.upvoted == '':
-            user.upvoted = '0,0'
-        if user.downvoted == '':
-            user.downvoted = '0,0'
-        if card_num in list(eval(user.upvoted)) or card_num in list(eval(user.downvoted)):
-            show_voting_btns = False
+        # if len(user.upvoted) == 1:
+        #     upvoted = str(user.upvoted) + ',' + str(user.upvoted)
+        # if len(user.downvoted) == 1:
+        #     downvoted = str(user.downvoted) + ',' + str(user.downvoted)
+        # if user.upvoted == '':
+        #     upvoted = '0,0'
+        # if user.downvoted == '':
+        #     downvoted = '0,0'
+        # if card_num in list(eval(user.upvoted)) or card_num in list(eval(user.downvoted)):
+            # show_voting_btns = False
     else:
-        flash(f'Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
+        flash(f'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
+
 
     table_query = table.query.get(card_num)
     card_submitter_id = table_query.user_id
@@ -227,7 +240,7 @@ def upvote():
     table_query = table.query.get(card_num)
     table_query.upvoted = table_query.upvoted + 1
     db.session.commit()
-    return study_question()
+    return home()
    
 
 @app.route("/downvote", methods=['GET', 'POST'])
@@ -255,7 +268,7 @@ def downvote():
     # Downvoted cards are archived.
     archive_card()
 
-    return study_question()
+    return home()
 
 
 @app.route("/flag", methods=['GET', 'POST'])
@@ -264,7 +277,7 @@ def flag():
     global table_name
     conn = sqlite3.connect(get_paths('codedriller\\site.db'))
     cursor = conn.cursor()
-    table_name = lang_tab[language]
+    # table_name = lang_tab[language]
     cursor.execute(f'Update {table_name} set flagged = 1 where id = {str(card_num)}')
     conn.commit()
 
@@ -288,7 +301,7 @@ def flag():
         card_table.flag_reason = form.reason.data
         db.session.commit()
         flash('Thank you for identifying content that needs to be flagged.', 'success')
-        return redirect(url_for('study_question'))
+        return redirect(url_for('home'))
     return render_template('flag_reason.html', title='Flag Reason', language=language, card_num=card_num, form=form)
 
 
@@ -296,7 +309,7 @@ def flag():
 @app.route("/archive")
 def archive():
     archive_card()
-    return study_question()
+    return home()
 
 def reset_users_cards():
     if current_user.is_authenticated:
@@ -309,37 +322,29 @@ def reset_users_cards():
             db.session.commit()
 
 
-def specify_subject(card_subject):
-    global table, table_name, language, recently_viewed, card_ids
-    table, table_name, language = card_subject
-    recently_viewed = []
-    card_ids = []
-    reset_users_cards()
+# Use the following routes to add additional languages to study.
 
+# @app.route("/java_cards")
+# def java_cards():
+#     specify_subject(card_subject = (JavaCards, 'java_cards',  'Java'))
+#     return study_question()
 
+# @app.route("/javascript_cards")
+# def javascript_cards():
+#     specify_subject(card_subject = (JavascriptCards, 'javascript_cards',  'JavaScript'))
+#     return study_question()
 
-@app.route("/java_cards")
-def java_cards():
-    specify_subject(card_subject = (JavaCards, 'java_cards',  'Java'))
-    return study_question()
-
-
-
-@app.route("/javascript_cards")
-def javascript_cards():
-    specify_subject(card_subject = (JavascriptCards, 'javascript_cards',  'JavaScript'))
-    return study_question()
-
-
-@app.route("/python_cards")
-def python_cards():
-    specify_subject(card_subject = (PythonCards, 'python_cards',  'Python'))
-    return study_question()
+# @app.route("/python_cards")
+# def python_cards():
+#     specify_subject(card_subject = (PythonCards, 'python_cards',  'Python'))
+#     return home()
 
 
 @app.route("/about")
 def about():
-    return render_template('about.html', title='About')
+    page = request.args.get('page', 1, type=int)
+    cards = table.query.order_by(table.id).paginate(page=page, per_page=10000)
+    return render_template('about.html', title='About', cards=cards)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -423,14 +428,14 @@ def new_post():
         db.session.add(cards)
         db.session.commit()
         flash('Your flashcard has been created!', 'success')
-        return redirect(url_for('study_question'))
+        return redirect(url_for('home'))
     return render_template('create_post.html', form=form, legend=f'New {language} Flashcard')
 
 
 def send_reset_email(user):
     token = user.get_reset_token()
-    msg = Message('Password Reset Request',
-                  sender='noreply@demo.com',
+    msg = Message('Code Driller Password Reset Request',
+                  sender=os.environ.get('EMAIL_USER'),
                   recipients=[user.email])
     msg.body = f'''To reset your password, visit the following link:
 {url_for('reset_token', token=token, _external=True)}
@@ -466,6 +471,6 @@ def reset_token(token):
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user.password = hashed_password
         db.session.commit()
-        flash('Your password has been updated! You are now able to log in', 'success')
+        flash('Your password has been updated! You are now able to log in.', 'success')
         return redirect(url_for('login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
