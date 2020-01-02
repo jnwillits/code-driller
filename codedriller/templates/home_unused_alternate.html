@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+    </p><br /><p>
+    <p class='article-content'>
+      Code Driller is where you can study software learning flashcards. Python is the only subject available, although other languages may be added. Find out more on the <a class="" href="{{ url_for('about') }}">About</a> page or select a card deck and study!
+    </p><br /><p>
+    <div>
+      <!-- <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('java_cards') }}">Java <span class="badge badge-light">{{java_tot}}</span></button> </a> 
+      <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('javascript_cards') }}">JavaScript <span class="badge badge-light">{{javascript_tot}}</span></button> </a>  -->
+      <a <button type="button" class="btn btn-primary mt-1 mb-5 ml-3" href="{{ url_for('python_cards') }}">Python <span class="badge badge-light">{{python_tot}}</span></button> </a> 
+
+    </div>
+{% endblock content %}

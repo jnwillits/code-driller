@@ -1,4 +1,55 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>About Page</h1>
+    <p class='account-heading'>About Code Driller</p>
+    <p class='article-content'>
+        </p>Some lessons require repetition to remember them. Tutorials, coding exercises, and coding projects do not always provide this as well 
+        as learning with flashcards. With flashcards you are prompted to recall information and formulate responses. Although the learning is 
+        not passive, many lessons can be covered relatively quickly so it is an effective way to supplement learning.</p>
+        </p>Code Driller is written to present flashcard content in your web browser. Submitting flashcards to Code Driller gives you a 
+        convenient way to document lessons as you learn them. They will be available to you at any time for review along with content other 
+        people provide. Flashcards can be useful to prepare for coding certification exams.</p>
+        </p>If you register and login, you will be able to add, archive, flag, and rate cards. Anything you contribute to Code Driller becomes 
+        public domain content. Do not post copyrighted content and flag any card that you suspect is copyrighted, off-topic, or is
+        inappropriate. Users can flag as many as three cards within a month.</p>
+        </p>Cards you have archived will not be presented to you until you have seen all available cards within the subject you are studying. 
+        Changing to a different study subject also resets the archive so all cards become available.</p>
+        </p> You can upvote or downvote cards. Code Driller's algorithm shows cards you downvote less frequently. All users will 
+        be presented cards with a higher downvote to upvote ratios less frequently than the higher-rated cards. The most poorly rated cards 
+        will be deleted so your input will improve the content. When you are writing a new card, it is usually best to answer the 
+        question with code. Here is an example:</p>
+        <br /><p>
+
+            {% for post in cards.items %}
+              {% if post.id == 1 %}
+        
+                <a class="ml-3 text-muted" <h1>Question</h1></a>
+                  <article class="media content-section">
+                  <div class="media-body">
+                    <b>
+                    <p class="article-content">{{ post.question }}</p>
+                    </b>
+                  </div>
+                </article>
+        
+                <a class="ml-3 text-muted" <h1>Answer</h1></a>
+                <article class="media content-section">
+                  <div class="media-body">
+                    <b>
+                    <p class="article-content">{{ post.answer }}</p>
+                    </b>
+                  </div>
+                </article>
+
+              {% endif %}
+            {% endfor %}
+        
+        <br />
+        <p>Code Driller is free and open source software written with HTML, CSS, Flask, and Python by Jeffrey Willits. The code repository
+        is in GitHub and author contact information is available via <a href='https://jnwillits.com/'>jnwillits.com</a>.</p>
+
+
+            <!-- Click <a href="http://www.yahoo.com">here</a> to go to yahoo. -->
+
+        <br />
+
 {% endblock content %}

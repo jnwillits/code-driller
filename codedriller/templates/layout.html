@@ -20,7 +20,10 @@
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Code Driller</a>
+          <a class="navbar-brand" href="/">
+            <img src="/static/logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+            Code Driller
+          </a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -84,19 +87,15 @@
 
           </div>
           {% if show_next_btn %}
-            <a <button type="button" class="btn btn-primary mt-1 mb-1 ml-1" href="{{ url_for('study_question') }}">Next Card</a> 
+            <a <button type="button" class="btn btn-primary mt-1 mb-1 ml-1" href="{{ url_for('home') }}">Next Card</a> 
           {% else %}
             <a <button type="button" class="btn btn-primary mt-1 mb-1 ml-1" href="{{ url_for('study_answer') }}">Answer</a> 
           {% endif %}
         {% endif %}
 
-
-
-
         </div>
       </div>
     </main>
-
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
