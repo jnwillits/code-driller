@@ -16,10 +16,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    java_cards = db.relationship('JavaCards', backref='author', lazy=True)
-    javascript_cards = db.relationship('JavascriptCards', backref='author', lazy=True)
     python_cards = db.relationship('PythonCards', backref='author', lazy=True)
-    studying = db.Column(db.String, nullable=False, default='')
     upvoted = db.Column(db.String, nullable=False, default='')
     downvoted = db.Column(db.String, nullable=False, default='')
     archived = db.Column(db.String, nullable=False, default='')
@@ -41,36 +38,6 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
-
-class JavaCards(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default='')
-    question = db.Column(db.Text, nullable=False)
-    answer = db.Column(db.Text, nullable=False)
-    upvoted = db.Column(db.Integer, nullable=False, default=0)
-    downvoted = db.Column(db.Integer, nullable=False, default=0)
-    flagged = db.Column(db.Integer, nullable=False, default=0)
-    flag_reason = db.Column(db.Text, nullable=False)
-
-    def __repr__(self):
-        return f"JavaCards('{self.id}', '{self.question}')"
-
-
-
-class JavascriptCards(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default='')
-    question = db.Column(db.Text, nullable=False)
-    answer = db.Column(db.Text, nullable=False)
-    upvoted = db.Column(db.Integer, nullable=False, default=0)
-    downvoted = db.Column(db.Integer, nullable=False, default=0)
-    flagged = db.Column(db.Integer, nullable=False, default=0)
-    flag_reason = db.Column(db.Text, nullable=False)
-
-    def __repr__(self):
-        return f"JavascriptCards('{self.id}', '{self.question}')"
-
 
 
 class PythonCards(db.Model):

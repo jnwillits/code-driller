@@ -9,7 +9,7 @@ from flask import render_template, url_for, flash, redirect, request, abort
 from codedriller import app, db, bcrypt, mail
 from codedriller.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              PostForm, FlagForm, RequestResetForm, ResetPasswordForm)
-from codedriller.models import User, JavaCards, JavascriptCards, PythonCards
+from codedriller.models import User, PythonCards
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_mail import Message
 
@@ -18,7 +18,7 @@ cards_tot = int()
 table = PythonCards
 table_name = 'python_cards'
 language = 'Python'
-# lang_tab = {'Java': 'java_cards', 'JavaScript': 'javascript_cards', 'Python': 'python_cards'}
+non_auth_note = 'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, archive, rate, and flag content.'
 
 
 def get_paths(path):
@@ -41,15 +41,6 @@ def get_cards_tot(table_name):
         flags = [e for e, in flags]
         total -= flags.count(1)
     return total
-
-
-# @app.route("/")
-# @app.route("/home")
-# def home():
-#     java_tot = get_cards_tot('java_cards')
-#     javascript_tot = get_cards_tot('javascript_cards')
-#     python_tot = get_cards_tot('python_cards')
-#     return render_template('home.html', title='Home', sidebar=False, java_tot=java_tot, javascript_tot=javascript_tot, python_tot=python_tot)
 
 
 def find_card_ids():
@@ -101,7 +92,7 @@ def home():
         cards_tot = 0
 
     if not current_user.is_authenticated:
-        flash(f'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
+        flash(non_auth_note, 'info')
 
     if cards_tot == 0 and not current_user.is_authenticated:
         flash('There are no cards in this deck. Please register, login, and add some!', 'warning')
@@ -182,41 +173,36 @@ def home():
     card_submitter_id = table_query.user_id
     user = User.query.get(card_submitter_id) 
     card_submitter = user.username
+    image_file = url_for('static', filename='profile_pics/' + user.image_file)
     
-    return render_template('home.html', card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
+    return render_template('home.html', image_file=image_file, card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
+
+
+
+def show_voting_btns_check():
+    """ Determine whether to show voting buttons based on if the user has voted on the card. """
+    user = User.query.get(current_user.id)
+    if str(card_num) in (user.upvoted).split(',') or str(card_num) in (user.downvoted).split(','):
+        return False
+    return True
 
 
 @app.route("/study_answer")
 def study_answer():
-    show_next_btn = True
-    show_voting_btns = True
-    
-    
     if current_user.is_authenticated:
-        # Determine whether the user has voted on the card.
-        # upvoted = ''
-        # downvoted = ''
-        user = User.query.get(current_user.id)
-        # if len(user.upvoted) == 1:
-        #     upvoted = str(user.upvoted) + ',' + str(user.upvoted)
-        # if len(user.downvoted) == 1:
-        #     downvoted = str(user.downvoted) + ',' + str(user.downvoted)
-        # if user.upvoted == '':
-        #     upvoted = '0,0'
-        # if user.downvoted == '':
-        #     downvoted = '0,0'
-        # if card_num in list(eval(user.upvoted)) or card_num in list(eval(user.downvoted)):
-            # show_voting_btns = False
+        show_voting_btns = show_voting_btns_check()
     else:
-        flash(f'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, upvote/downvote, archive, and flag the flashcards.', 'warning')
-
+        show_voting_btns = False
+        flash(non_auth_note, 'info')
 
     table_query = table.query.get(card_num)
     card_submitter_id = table_query.user_id
     user = User.query.get(card_submitter_id) 
     card_submitter = user.username
+    image_file = url_for('static', filename='profile_pics/' + user.image_file)
 
-    return render_template('study_answer.html', card_submitter=card_submitter, show_voting_btns=show_voting_btns, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num=card_num, card_num_formatted=card_num_formatted, cards_tot=cards_tot, cards=cards, sidebar=True)
+    return render_template('study_answer.html', image_file=image_file, card_submitter=card_submitter, show_voting_btns=show_voting_btns, show_next_btn=True, num_archived=num_archived, language=language, card_num=card_num, card_num_formatted=card_num_formatted, cards_tot=cards_tot, cards=cards, sidebar=True)
+
 
 
 @app.route("/upvote", methods=['GET', 'POST'])
@@ -314,30 +300,10 @@ def archive():
 def reset_users_cards():
     if current_user.is_authenticated:
         user = User.query.get(current_user.id) 
-        if language != user.studying:
-            user.studying = language
-            user.upvoted = ''
-            user.downvoted = ''
-            user.archived = ''
-            db.session.commit()
-
-
-# Use the following routes to add additional languages to study.
-
-# @app.route("/java_cards")
-# def java_cards():
-#     specify_subject(card_subject = (JavaCards, 'java_cards',  'Java'))
-#     return study_question()
-
-# @app.route("/javascript_cards")
-# def javascript_cards():
-#     specify_subject(card_subject = (JavascriptCards, 'javascript_cards',  'JavaScript'))
-#     return study_question()
-
-# @app.route("/python_cards")
-# def python_cards():
-#     specify_subject(card_subject = (PythonCards, 'python_cards',  'Python'))
-#     return home()
+        user.upvoted = ''
+        user.downvoted = ''
+        user.archived = ''
+        db.session.commit()
 
 
 @app.route("/about")
