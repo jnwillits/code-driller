@@ -66,10 +66,7 @@
         {% if sidebar %}
           <div class="mt-4 col-md-3">
               <div class="content-section">
-                  <p
                   <br />
-                  <p class='text-muted'>Studying: <b> {{ language }} </b>
-                  </p>                  
                   <p class='text-muted'>Total cards in deck: <b> {{ cards_tot }} </b>
                   </p>
 
@@ -83,7 +80,16 @@
                   </p>
                   
                   <p class='text-muted'>Submitted by: <b> {{ card_submitter }} </b>
+                  
+                  <div class="media">
+                    <img class="rounded-circle account-img" src="{{ image_file }}">
+                  </div>    
+                  
                   </p>
+
+
+
+
 
           </div>
           {% if show_next_btn %}
