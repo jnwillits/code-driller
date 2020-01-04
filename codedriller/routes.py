@@ -18,6 +18,7 @@ cards_tot = int()
 table = PythonCards
 table_name = 'python_cards'
 language = 'Python'
+recently_viewed = []
 non_auth_note = 'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, archive, rate, and flag content.'
 
 
@@ -62,27 +63,16 @@ def archive_card():
     db.session.commit()
 
 
-def specify_subject(card_subject):
-    """ This will be useful when adding other card decks (SQL tables). """
-    global table, table_name, language, recently_viewed, card_ids
-    table, table_name, language = card_subject
-    recently_viewed = []
-    card_ids = []
-    reset_users_cards()
-
-
 @app.route("/")
 @app.route("/home")
 def home():    
     global card_num, cards_tot, cards, recently_viewed, card_ids, num_archived, card_num_formatted
 
-    # Make this call from a route if more languages are added.
-    specify_subject(card_subject = (PythonCards, 'python_cards',  'Python'))
-
-    # If this page is displayed without a language subject, route them to the home page.
-    if language == '':
-        return home()
-
+    card_subject = (PythonCards, 'python_cards',  'Python')
+    table, table_name, language = card_subject
+    
+    card_ids = []
+ 
     page = request.args.get('page', 1, type=int)
     cards = table.query.order_by(table.id).paginate(page=page, per_page=10000)
     rows_tot = get_cards_tot(table_name)
@@ -169,6 +159,7 @@ def home():
     card_num_formatted = ('000' + str(card_num))[-4:]
     show_next_btn = False
     
+
     table_query = table.query.get(card_num) 
     card_submitter_id = table_query.user_id
     user = User.query.get(card_submitter_id) 
@@ -176,7 +167,6 @@ def home():
     image_file = url_for('static', filename='profile_pics/' + user.image_file)
     
     return render_template('home.html', image_file=image_file, card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
-
 
 
 def show_voting_btns_check():
@@ -296,14 +286,6 @@ def flag():
 def archive():
     archive_card()
     return home()
-
-def reset_users_cards():
-    if current_user.is_authenticated:
-        user = User.query.get(current_user.id) 
-        user.upvoted = ''
-        user.downvoted = ''
-        user.archived = ''
-        db.session.commit()
 
 
 @app.route("/about")
