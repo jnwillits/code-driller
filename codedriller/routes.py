@@ -19,7 +19,9 @@ table = PythonCards
 table_name = 'python_cards'
 language = 'Python'
 recently_viewed = []
-non_auth_note = 'Use Code Driller to study Python learning flashcards. Study as a guest or login to create, archive, rate, and flag content.'
+non_auth_note = 'Study Python flashcards as a guest or login to create, archive, rate, and flag content.'
+flagging_suspended = False
+show_study_nav = True
 
 
 def get_paths(path):
@@ -72,6 +74,7 @@ def home():
     table, table_name, language = card_subject
     
     card_ids = []
+    show_study_nav = False
  
     page = request.args.get('page', 1, type=int)
     cards = table.query.order_by(table.id).paginate(page=page, per_page=10000)
@@ -82,7 +85,7 @@ def home():
         cards_tot = 0
 
     if not current_user.is_authenticated:
-        flash(non_auth_note, 'info')
+        flash(non_auth_note, 'alert-secondary')
 
     if cards_tot == 0 and not current_user.is_authenticated:
         flash('There are no cards in this deck. Please register, login, and add some!', 'warning')
@@ -144,7 +147,6 @@ def home():
                 if table_query.upvoted == 0 and table_query.downvoted > 0:
                     card_num = choice(tuple(elgible_ids))
 
-
     card_ids = find_card_ids()
     recently_viewed_max = int(0.2 * len(card_ids))
     x = len(card_ids)
@@ -158,7 +160,6 @@ def home():
 
     card_num_formatted = ('000' + str(card_num))[-4:]
     show_next_btn = False
-    
 
     table_query = table.query.get(card_num) 
     card_submitter_id = table_query.user_id
@@ -166,7 +167,7 @@ def home():
     card_submitter = user.username
     image_file = url_for('static', filename='profile_pics/' + user.image_file)
     
-    return render_template('home.html', image_file=image_file, card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
+    return render_template('home.html', show_study_nav=False, image_file=image_file, card_submitter=card_submitter, show_next_btn=show_next_btn, num_archived=num_archived, language=language, card_num_formatted=card_num_formatted, card_num=card_num, cards_tot=cards_tot, cards=cards, sidebar=sidebar, card_ids=card_ids, user_archived=user_archived, elgible_ids=elgible_ids, recently_viewed=recently_viewed)
 
 
 def show_voting_btns_check():
@@ -183,7 +184,7 @@ def study_answer():
         show_voting_btns = show_voting_btns_check()
     else:
         show_voting_btns = False
-        flash(non_auth_note, 'info')
+        flash(non_auth_note, 'alert-secondary')
 
     table_query = table.query.get(card_num)
     card_submitter_id = table_query.user_id
@@ -191,7 +192,7 @@ def study_answer():
     card_submitter = user.username
     image_file = url_for('static', filename='profile_pics/' + user.image_file)
 
-    return render_template('study_answer.html', image_file=image_file, card_submitter=card_submitter, show_voting_btns=show_voting_btns, show_next_btn=True, num_archived=num_archived, language=language, card_num=card_num, card_num_formatted=card_num_formatted, cards_tot=cards_tot, cards=cards, sidebar=True)
+    return render_template('study_answer.html', show_study_nav=False, flagging_suspended=flagging_suspended, image_file=image_file, card_submitter=card_submitter, show_voting_btns=show_voting_btns, show_next_btn=True, num_archived=num_archived, language=language, card_num=card_num, card_num_formatted=card_num_formatted, cards_tot=cards_tot, cards=cards, sidebar=True)
 
 
 
@@ -250,7 +251,7 @@ def downvote():
 @app.route("/flag", methods=['GET', 'POST'])
 @app.route("/flag")
 def flag():
-    global table_name
+    global table_name, flagging_suspended
     conn = sqlite3.connect(get_paths('codedriller\\site.db'))
     cursor = conn.cursor()
     # table_name = lang_tab[language]
@@ -265,10 +266,12 @@ def flag():
         user.flagged = 0
     # Update the user table to increment the total of flagged cards. 
     if user.flagged < 4:
+        flagging_suspended = False
         user.flagged = user.flagged + 1
         user.date_flagged = datetime.utcnow()
         db.session.commit()
     else:
+        flagging_suspended = True
         flash('You reached the maximum number of cards that can be flagged within a 30 day period.', 'warning')
 
     form = FlagForm()
@@ -292,7 +295,7 @@ def archive():
 def about():
     page = request.args.get('page', 1, type=int)
     cards = table.query.order_by(table.id).paginate(page=page, per_page=10000)
-    return render_template('about.html', title='About', cards=cards)
+    return render_template('about.html', show_study_nav=True, title='About', cards=cards)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -307,7 +310,7 @@ def register():
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', show_study_nav=True, title='Register', form=form)
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -323,7 +326,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login.html', show_study_nav=True, title='Login', form=form)
 
 
 @app.route("/logout")
